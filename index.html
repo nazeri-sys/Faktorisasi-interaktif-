@@ -1,0 +1,844 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Pembelajaran Faktorisasi Aljabar</title>
+    
+    <!-- Tailwind CSS untuk Styling Responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Font: Fredoka (Playful) & Nunito (Teks Buku) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- MathJax untuk Render Simbol Matematika (Seperti Buku Paket) -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+
+    <style>
+        :root {
+            --font-heading: 'Fredoka', sans-serif;
+            --font-body: 'Nunito', sans-serif;
+        }
+        body { font-family: var(--font-body); overflow-x: hidden; background-color: #f0f9ff; }
+        h1, h2, h3, h4, .font-heading { font-family: var(--font-heading); }
+        
+        .tab-content { display: none; opacity: 0; transform: translateY(15px); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
+        .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
+        
+        /* Animasi */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .floating { animation: float 3s ease-in-out infinite; }
+        .floating-delay { animation: float 3s ease-in-out infinite; animation-delay: 1.5s; }
+        
+        /* Tombol 3D */
+        .btn-chunky {
+            transition: all 0.1s;
+            border-bottom-width: 4px;
+        }
+        .btn-chunky:active {
+            transform: translateY(4px);
+            border-bottom-width: 0px;
+            margin-bottom: 4px;
+        }
+
+        /* Styling Tabel Buku Paket */
+        .math-table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .math-table th { background-color: #e0f2fe; color: #0284c7; padding: 12px; font-weight: bold; border: 1px solid #bae6fd; text-align: center; }
+        .math-table td { padding: 12px; border: 1px solid #e0f2fe; text-align: center; color: #334155; }
+        .math-table tr:hover td { background-color: #f8fafc; }
+
+        /* Bubble Game Styles */
+        .bubble-container { position: relative; height: 350px; width: 100%; border-radius: 24px; overflow: hidden; background: linear-gradient(135deg, #0ea5e9, #6366f1); border: 6px solid #e0f2fe; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
+        .bubble {
+            width: 70px; height: 70px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 700; font-family: var(--font-heading);
+            cursor: pointer;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.15), inset 5px 5px 10px rgba(255,255,255,0.4), 0 8px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+            border: 2px solid rgba(255,255,255,0.5);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .bubble:hover { transform: scale(1.1) translateY(-5px); z-index: 10;}
+        .bubble.selected { 
+            border: 4px solid #fff; 
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.15), inset 5px 5px 10px rgba(255,255,255,0.4), 0 0 20px #fbbf24; 
+            transform: scale(1.15); 
+            z-index: 20;
+        }
+        .bubble.pop { transform: scale(0); opacity: 0; transition: all 0.3s; }
+        
+        /* Opsi Kuis Khusus */
+        .quiz-option { transition: all 0.2s; }
+        .quiz-option:hover { background-color: #f0f9ff; border-color: #7dd3fc; }
+        input[type="radio"]:checked + .quiz-label-box { background-color: #e0f2fe; border-color: #0ea5e9; box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2); }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col bg-[url('data:image/svg+xml;utf8,<svg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'><g fill=\'none\' fill-rule=\'evenodd\'><g fill=\'%230ea5e9\' fill-opacity=\'0.05\'><path d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/></g></g></svg>')]">
+
+    <header class="bg-sky-500 text-white shadow-xl sticky top-0 z-50 border-b-4 border-sky-700">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3 floating font-heading">
+                <div class="bg-yellow-400 text-yellow-900 p-2.5 rounded-2xl shadow-lg border-b-4 border-yellow-600 font-bold text-xl transform rotate-3">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-2xl leading-tight text-white drop-shadow-md">Aljabar<span class="text-yellow-300">Fun</span></h1>
+                    <p class="text-sm text-sky-100 font-medium tracking-wide font-body">Pintar Faktorisasi Kuadrat</p>
+                </div>
+            </div>
+            <nav class="flex flex-wrap gap-2 justify-center font-heading">
+                <button onclick="switchTab('beranda')" id="btn-beranda" class="nav-btn btn-chunky px-4 py-2 rounded-xl font-bold text-sm bg-sky-600 border-sky-800 shadow flex items-center gap-2">
+                    <i class="fa-solid fa-home"></i> Beranda
+                </button>
+                <button onclick="switchTab('tujuan')" id="btn-tujuan" class="nav-btn btn-chunky px-4 py-2 rounded-xl font-bold text-sm hover:bg-sky-400 border-sky-600 flex items-center gap-2 text-sky-50">
+                    <i class="fa-solid fa-bullseye"></i> Tujuan
+                </button>
+                <button onclick="switchTab('materi')" id="btn-materi" class="nav-btn btn-chunky px-4 py-2 rounded-xl font-bold text-sm hover:bg-sky-400 border-sky-600 flex items-center gap-2 text-sky-50">
+                    <i class="fa-solid fa-book-open"></i> Materi
+                </button>
+                <button onclick="switchTab('game')" id="btn-game" class="nav-btn btn-chunky px-4 py-2 rounded-xl font-bold text-sm hover:bg-sky-400 border-sky-600 flex items-center gap-2 text-sky-50">
+                    <i class="fa-solid fa-gamepad"></i> Game
+                </button>
+                <button onclick="switchTab('evaluasi')" id="btn-evaluasi" class="nav-btn btn-chunky px-4 py-2 rounded-xl font-bold text-sm hover:bg-sky-400 border-sky-600 flex items-center gap-2 text-sky-50">
+                    <i class="fa-solid fa-list-check"></i> Kuis
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4 md:p-6 my-4">
+
+        <!-- 1. BERANDA -->
+        <section id="beranda" class="tab-content active space-y-6">
+            <div class="bg-gradient-to-br from-sky-400 to-blue-600 rounded-3xl p-8 md:p-12 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 border-b-8 border-blue-800 relative overflow-hidden">
+                <div class="absolute top-0 right-0 text-white opacity-10 text-9xl -mr-10 -mt-10"><i class="fa-solid fa-shapes"></i></div>
+                
+                <div class="space-y-5 max-w-xl relative z-10">
+                    <span class="bg-yellow-400 text-yellow-900 text-sm font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-sm inline-block transform -rotate-2 font-heading">E-Learning Interaktif</span>
+                    <h2 class="text-4xl md:text-5xl font-black tracking-tight drop-shadow-lg leading-tight font-heading">Kuasai Faktorisasi <br> <span class="text-yellow-300">$x^2 + bx + c$</span></h2>
+                    <p class="text-sky-100 text-base md:text-lg font-medium leading-relaxed">
+                        Selamat datang! Di sini kita akan belajar memfaktorkan bentuk aljabar dengan cara yang sangat mudah, jelas seperti buku paket, dan seru seperti bermain game.
+                    </p>
+                    <div class="pt-4 flex flex-wrap gap-4">
+                        <button onclick="switchTab('tujuan')" class="btn-chunky bg-yellow-400 text-yellow-900 hover:bg-yellow-300 font-black px-6 py-3 rounded-2xl shadow-lg border-yellow-600 flex items-center gap-2 font-heading">
+                            Mulai Belajar <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-3xl shadow-2xl text-slate-800 w-full md:w-80 text-center space-y-4 relative z-10 transform md:rotate-2 border-4 border-sky-200 floating">
+                    <div class="bg-sky-50 py-4 px-4 rounded-2xl text-2xl text-sky-600 font-black border-2 border-dashed border-sky-300">
+                        $$x^2 + 5x + 6$$
+                        <i class="fa-solid fa-arrow-down text-sky-300 my-2 text-xl"></i>
+                        $$(x + 2)(x + 3)$$
+                    </div>
+                    <p class="text-sm text-slate-500 font-bold">Siap mengetahui rahasianya?</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. TUJUAN PEMBELAJARAN -->
+        <section id="tujuan" class="tab-content space-y-6">
+            <div class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border-4 border-sky-100 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 text-sky-50 opacity-50 text-9xl"><i class="fa-solid fa-bullseye"></i></div>
+                
+                <div class="border-b-4 border-sky-100 pb-4 relative z-10 flex items-center gap-4">
+                    <div class="bg-sky-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner transform -rotate-3">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-sky-900 font-heading">Tujuan Pembelajaran</h2>
+                </div>
+
+                <div class="mt-8 relative z-10">
+                    <p class="text-lg text-slate-600 mb-6 font-bold">Setelah mempelajari materi pada situs web ini, peserta didik diharapkan mampu:</p>
+                    
+                    <ul class="space-y-4">
+                        <li class="flex gap-4 items-start bg-sky-50 p-4 rounded-2xl border-l-4 border-sky-500 hover:bg-sky-100 transition">
+                            <div class="bg-white text-sky-500 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold shadow-sm">1</div>
+                            <p class="text-slate-700 leading-relaxed"><strong>Menjelaskan konsep dasar</strong> faktorisasi bentuk aljabar kuadrat $x^2 + bx + c$ sebagai proses mengubah bentuk penjumlahan menjadi perkalian dua suku binom.</p>
+                        </li>
+                        <li class="flex gap-4 items-start bg-sky-50 p-4 rounded-2xl border-l-4 border-sky-500 hover:bg-sky-100 transition">
+                            <div class="bg-white text-sky-500 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold shadow-sm">2</div>
+                            <p class="text-slate-700 leading-relaxed"><strong>Menentukan pasangan bilangan</strong> yang tepat dimana hasil kalinya sama dengan konstanta $c$ dan jumlahnya sama dengan koefisien $b$.</p>
+                        </li>
+                        <li class="flex gap-4 items-start bg-sky-50 p-4 rounded-2xl border-l-4 border-sky-500 hover:bg-sky-100 transition">
+                            <div class="bg-white text-sky-500 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold shadow-sm">3</div>
+                            <p class="text-slate-700 leading-relaxed"><strong>Menerapkan aturan tanda</strong> operasi hitung (+ dan -) secara mandiri dan bernalar kritis dalam memfaktorkan berbagai variasi soal aljabar.</p>
+                        </li>
+                        <li class="flex gap-4 items-start bg-sky-50 p-4 rounded-2xl border-l-4 border-sky-500 hover:bg-sky-100 transition">
+                            <div class="bg-white text-sky-500 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold shadow-sm">4</div>
+                            <p class="text-slate-700 leading-relaxed"><strong>Menyelesaikan masalah atau soal evaluasi</strong> faktorisasi $x^2 + bx + c$ dengan teliti dan mendapatkan hasil yang benar.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="flex justify-end pt-8 mt-6 border-t-2 border-slate-100">
+                    <button onclick="switchTab('materi')" class="btn-chunky bg-sky-500 hover:bg-sky-400 text-white font-bold px-6 py-3 rounded-xl shadow border-sky-700 flex items-center gap-2 font-heading">
+                        Mulai Belajar Materi <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. MATERI -->
+        <section id="materi" class="tab-content space-y-6">
+            <div class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border-4 border-sky-100 relative">
+                
+                <div class="text-center mb-10">
+                    <span class="bg-sky-100 text-sky-600 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest font-heading">Buku Elektronik</span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-sky-900 mt-4 font-heading">Pemfaktoran $x^2 + bx + c$</h2>
+                </div>
+
+                <!-- Definisi -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-sky-800 border-b-2 border-sky-200 pb-2 mb-4 font-heading">A. Konsep Dasar Pemfaktoran</h3>
+                    <p class="text-slate-700 leading-relaxed text-lg mb-4">
+                        Memfaktorkan suatu bentuk aljabar artinya mengubah bentuk penjumlahan atau pengurangan suku-suku aljabar menjadi bentuk perkalian faktor-faktornya.
+                    </p>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-5 rounded-r-xl my-4">
+                        <p class="text-slate-800 font-semibold mb-2">Bentuk umum yang akan kita faktorkan adalah:</p>
+                        <div class="text-center text-2xl py-2">
+                            $$ x^2 + bx + c $$
+                        </div>
+                        <p class="text-slate-700 mt-2 text-sm">Dimana $x$ adalah variabel, $b$ adalah koefisien dari $x$, dan $c$ adalah konstanta.</p>
+                    </div>
+                </div>
+
+                <!-- Algoritma / Rumus -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-sky-800 border-b-2 border-sky-200 pb-2 mb-4 font-heading">B. Aturan Pemfaktoran</h3>
+                    <p class="text-slate-700 leading-relaxed text-lg mb-4">
+                        Bentuk $x^2 + bx + c$ dapat difaktorkan menjadi bentuk perkalian dua kurung (binom):
+                    </p>
+                    <div class="text-center text-2xl font-bold text-sky-700 bg-sky-50 py-4 rounded-xl border border-sky-200">
+                        $$ x^2 + bx + c = (x + p)(x + q) $$
+                    </div>
+                    <p class="text-slate-700 leading-relaxed text-lg mt-4 font-bold text-center">
+                        Dengan Syarat Mutlak:
+                    </p>
+                    <div class="flex flex-col md:flex-row gap-4 justify-center mt-4">
+                        <div class="bg-white border-2 border-rose-300 p-4 rounded-xl text-center shadow-sm w-full md:w-1/2">
+                            <span class="block text-slate-500 text-sm font-bold mb-1">Jika Dijumlahkan:</span>
+                            <span class="text-xl font-bold text-rose-600">$$ p + q = b $$</span>
+                        </div>
+                        <div class="bg-white border-2 border-lime-300 p-4 rounded-xl text-center shadow-sm w-full md:w-1/2">
+                            <span class="block text-slate-500 text-sm font-bold mb-1">Jika Dikalikan:</span>
+                            <span class="text-xl font-bold text-lime-600">$$ p \times q = c $$</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contoh Soal dengan Tabel -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-sky-800 border-b-2 border-sky-200 pb-2 mb-4 font-heading">C. Contoh Soal & Pembahasan</h3>
+                    
+                    <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-sm mb-6">
+                        <div class="bg-slate-100 px-6 py-3 border-b border-slate-200">
+                            <h4 class="font-bold text-slate-800">Contoh 1: Faktorkan $x^2 + 5x + 6$</h4>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-slate-700 mb-2">Dari soal diketahui: <br> Koefisien $b = 5$ <br> Konstanta $c = 6$</p>
+                            <p class="text-slate-700 mb-4 font-semibold">Langkah: Carilah dua bilangan yang jika dikalikan hasilnya $6$, dan jika dijumlahkan hasilnya $5$.</p>
+                            
+                            <table class="math-table">
+                                <thead>
+                                    <tr>
+                                        <th>Faktor dari 6 ($p$ dan $q$)</th>
+                                        <th>Hasil Jumlah ($p + q$)</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>$1$ dan $6$</td>
+                                        <td>$1 + 6 = 7$</td>
+                                        <td class="text-rose-500"><i class="fa-solid fa-xmark"></i> Salah</td>
+                                    </tr>
+                                    <tr class="bg-lime-50 font-bold">
+                                        <td>$2$ dan $3$</td>
+                                        <td>$2 + 3 = 5$</td>
+                                        <td class="text-lime-600"><i class="fa-solid fa-check"></i> Benar! (Sesuai $b$)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>$-1$ dan $-6$</td>
+                                        <td>$-1 + (-6) = -7$</td>
+                                        <td class="text-rose-500"><i class="fa-solid fa-xmark"></i> Salah</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="mt-4 p-4 bg-sky-50 rounded-xl">
+                                <p class="text-slate-700">Karena bilangan yang memenuhi adalah $p = 2$ dan $q = 3$, maka bentuk pemfaktorannya adalah:</p>
+                                <p class="text-center font-bold text-2xl text-sky-700 mt-2">$$ (x + 2)(x + 3) $$</p>
+                               </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                        <div class="bg-slate-100 px-6 py-3 border-b border-slate-200">
+                            <h4 class="font-bold text-slate-800">Contoh 2 (Ada tanda Negatif): Faktorkan $x^2 - x - 12$</h4>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-slate-700 mb-2">Diketahui: <br> $b = -1$ (jika ditulis $-x$, berarti $-1x$) <br> $c = -12$</p>
+                            <p class="text-slate-700 mb-4 font-semibold">Cari bilangan yang jika dikali hasilnya $-12$, dan dijumlahkan hasilnya $-1$. Karena $c$ negatif, maka salah satu angka pasti negatif.</p>
+                            
+                            <table class="math-table">
+                                <thead>
+                                    <tr>
+                                        <th>Faktor dari -12 ($p, q$)</th>
+                                        <th>Hasil Jumlah ($p + q$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>$1$ dan $-12$</td><td>$-11$</td></tr>
+                                    <tr><td>$2$ dan $-6$</td><td>$-4$</td></tr>
+                                    <tr class="bg-lime-50 font-bold border-2 border-lime-300">
+                                        <td>$3$ dan $-4$</td>
+                                        <td class="text-lime-700">$3 + (-4) = -1$ <i class="fa-solid fa-check ml-2"></i></td>
+                                    </tr>
+                                    <tr><td>$4$ dan $-3$</td><td>$1$</td></tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="mt-4 p-4 bg-sky-50 rounded-xl">
+                                <p class="text-slate-700">Bilangan yang tepat adalah $3$ dan $-4$. Maka pemfaktorannya:</p>
+                                <p class="text-center font-bold text-2xl text-sky-700 mt-2">$$ (x + 3)(x - 4) $$</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between pt-6 border-t-4 border-slate-100 gap-4">
+                    <button onclick="switchTab('tujuan')" class="btn-chunky bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-6 py-3 rounded-xl border-slate-400 flex items-center justify-center gap-2 font-heading">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                    </button>
+                    <button onclick="switchTab('game')" class="btn-chunky bg-pink-500 hover:bg-pink-400 text-white font-black px-8 py-3 rounded-xl border-pink-700 shadow-lg flex items-center justify-center gap-2 animate-bounce font-heading">
+                        Latih di Game Bubble! <i class="fa-solid fa-gamepad text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. MINI GAME -->
+        <section id="game" class="tab-content space-y-6">
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-sky-100 space-y-6">
+                
+                <div class="text-center">
+                    <h2 class="text-3xl font-black text-sky-900 font-heading">Game Bubble Pop!</h2>
+                    <p class="text-slate-600">Pecahkan 2 gelembung angka yang tepat untuk memfaktorkan persamaan.</p>
+                </div>
+
+                <div class="flex justify-center mb-4">
+                    <div class="bg-yellow-100 border-4 border-yellow-400 px-6 py-2 rounded-full flex items-center gap-3">
+                        <i class="fa-solid fa-star text-yellow-500 text-2xl"></i>
+                        <span class="text-yellow-800 font-black text-xl font-heading">Skor: <span id="game-score">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Area Game -->
+                <div class="bg-slate-50 border-4 border-slate-200 rounded-3xl p-4 md:p-6 text-center space-y-6">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm inline-block border-2 border-sky-100">
+                        <span class="text-sm text-slate-400 uppercase tracking-widest font-black block mb-2 font-heading">Soal Faktorisasi:</span>
+                        <div id="bubble-equation" class="text-3xl font-black text-indigo-700 font-body">
+                            <!-- Diisi oleh JS -->
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-4 md:gap-8 mb-4">
+                        <div class="bg-white px-4 py-2 rounded-xl shadow border-b-4 border-rose-200">
+                            <span class="text-slate-500 font-bold block text-xs">Jumlah ($b$)</span>
+                            <span id="bubble-target-b" class="text-2xl font-black text-rose-500"></span>
+                        </div>
+                        <div class="bg-white px-4 py-2 rounded-xl shadow border-b-4 border-lime-200">
+                            <span class="text-slate-500 font-bold block text-xs">Hasil Kali ($c$)</span>
+                            <span id="bubble-target-c" class="text-2xl font-black text-lime-600"></span>
+                        </div>
+                    </div>
+
+                    <div id="bubble-area" class="bubble-container">
+                        <!-- Gelembung di-generate via JS -->
+                    </div>
+
+                    <div id="game-msg" class="text-lg font-bold text-sky-800 bg-sky-100 border-2 border-sky-300 px-6 py-2 rounded-full inline-block mt-4">
+                        Pilih 2 gelembung yang benar!
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t-2 border-slate-100">
+                    <button onclick="switchTab('evaluasi')" class="btn-chunky bg-lime-500 hover:bg-lime-400 text-white font-black px-6 py-3 rounded-xl border-lime-700 shadow-lg flex items-center gap-2 font-heading">
+                        Lanjut ke Evaluasi <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. EVALUASI (KUIS) -->
+        <section id="evaluasi" class="tab-content space-y-6">
+            <div class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border-4 border-sky-100">
+                <div class="text-center mb-8 border-b-2 border-slate-100 pb-6">
+                    <h2 class="text-3xl font-black text-sky-900 font-heading">Kuis Evaluasi Akhir</h2>
+                    <p class="text-slate-600 mt-2">Uji pemahamanmu dengan menjawab 5 pertanyaan di bawah ini.</p>
+                </div>
+
+                <form id="quiz-form" onsubmit="submitQuiz(event)">
+                    <div class="space-y-8">
+                        
+                        <!-- Soal 1 -->
+                        <div class="quiz-item">
+                            <p class="text-lg font-bold text-slate-800 mb-3">1. Bentuk pemfaktoran dari $x^2 + 7x + 10$ adalah ...</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-2">
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q1" value="A" class="peer sr-only" required>
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        A. $(x + 2)(x + 5)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q1" value="B" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        B. $(x - 2)(x - 5)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q1" value="C" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        C. $(x + 1)(x + 10)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q1" value="D" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        D. $(x - 1)(x + 10)$
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Soal 2 -->
+                        <div class="quiz-item">
+                            <p class="text-lg font-bold text-slate-800 mb-3">2. Hasil pemfaktoran dari $x^2 - 3x - 18$ adalah ...</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-2">
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q2" value="A" class="peer sr-only" required>
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        A. $(x - 3)(x - 6)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q2" value="B" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        B. $(x + 3)(x + 6)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q2" value="C" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        C. $(x + 3)(x - 6)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q2" value="D" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        D. $(x - 3)(x + 6)$
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Soal 3 -->
+                        <div class="quiz-item">
+                            <p class="text-lg font-bold text-slate-800 mb-3">3. Jika bentuk $x^2 - 9x + 20$ difaktorkan menjadi $(x+p)(x+q)$, berapakah nilai $p$ dan $q$?</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-2">
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q3" value="A" class="peer sr-only" required>
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        A. $4$ dan $5$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q3" value="B" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        B. $-4$ dan $-5$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q3" value="C" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        C. $-2$ dan $-10$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q3" value="D" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        D. $2$ dan $10$
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Soal 4 -->
+                        <div class="quiz-item">
+                            <p class="text-lg font-bold text-slate-800 mb-3">4. Salah satu faktor dari bentuk $x^2 + 2x - 15$ adalah ...</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-2">
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q4" value="A" class="peer sr-only" required>
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        A. $(x - 5)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q4" value="B" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        B. $(x + 5)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q4" value="C" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        C. $(x + 3)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q4" value="D" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        D. $(x + 15)$
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Soal 5 -->
+                        <div class="quiz-item">
+                            <p class="text-lg font-bold text-slate-800 mb-3">5. Faktorisasi yang benar untuk $x^2 - 10x + 25$ adalah ...</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-2">
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q5" value="A" class="peer sr-only" required>
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        A. $(x - 5)(x + 5)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q5" value="B" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        B. $(x + 5)(x + 5)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q5" value="C" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        C. $(x - 5)(x - 5)$
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="q5" value="D" class="peer sr-only">
+                                    <div class="quiz-label-box p-4 rounded-xl border-2 border-slate-200 quiz-option">
+                                        D. $(x - 25)(x - 1)$
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="text-center mt-10">
+                        <button type="submit" class="btn-chunky bg-sky-600 hover:bg-sky-500 text-white font-black text-lg px-10 py-4 rounded-2xl shadow-lg border-sky-800 font-heading">
+                            Kirim Jawaban <i class="fa-solid fa-paper-plane ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Hasil Kuis -->
+                <div id="quiz-result" class="hidden bg-gradient-to-br from-lime-100 to-emerald-100 border-4 border-lime-400 rounded-3xl p-8 text-center space-y-6 shadow-lg mt-8">
+                    <div class="w-24 h-24 bg-yellow-400 text-yellow-900 border-4 border-yellow-200 rounded-full flex items-center justify-center text-5xl mx-auto shadow-xl floating">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-slate-900 font-heading">Nilai Kamu:</h3>
+                    <div class="text-7xl font-black text-lime-700 bg-white inline-block px-10 py-4 rounded-3xl border-4 border-lime-300 shadow-inner font-heading">
+                        <span id="final-score">0</span>
+                    </div>
+                    
+                    <div id="feedback-container" class="max-w-md mx-auto bg-white p-4 rounded-xl border-2 border-lime-200 shadow-sm text-lg font-bold">
+                        <!-- Diisi via JS -->
+                    </div>
+
+                    <!-- Tempat pembahasan otomatis jika ada salah -->
+                    <div id="pembahasan" class="hidden text-left bg-white p-6 rounded-2xl border-2 border-rose-200 mt-4 space-y-3">
+                        <h4 class="font-bold text-rose-600 border-b pb-2 mb-3">Kunci Jawaban yang Benar:</h4>
+                        <ul id="kunci-list" class="text-sm text-slate-700 space-y-2"></ul>
+                    </div>
+
+                    <button onclick="resetQuiz()" class="btn-chunky bg-emerald-500 hover:bg-emerald-400 text-white font-black px-8 py-3 rounded-xl border-emerald-700 shadow mt-4 font-heading">
+                        Coba Lagi <i class="fa-solid fa-rotate-right ml-2"></i>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t-4 border-sky-200 mt-auto py-6 text-center text-sm font-medium text-slate-500">
+        <p class="font-black text-sky-700 font-heading text-lg">AljabarFun! • E-Learning Interaktif</p>
+        <p>Belajar Matematika itu Mudah dan Menyenangkan.</p>
+    </footer>
+
+    <script>
+        // --- 1. Logika Tab / Navigasi ---
+        function switchTab(tabId) {
+            // Sembunyikan semua konten
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            
+            // Reset style tombol navigasi
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'border-sky-800');
+                btn.classList.add('hover:bg-sky-400', 'border-sky-600', 'text-sky-50');
+            });
+
+            // Tampilkan tab yang dipilih
+            document.getElementById(tabId).classList.add('active');
+            
+            // Aktifkan tombol yang diklik
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-sky-600', 'border-sky-800');
+                activeBtn.classList.remove('hover:bg-sky-400', 'text-sky-50');
+            }
+
+            // Render ulang MathJax jika masuk ke tab materi atau evaluasi agar rumus tampil sempurna
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+
+            // Inisialisasi Game jika tab game dibuka pertama kali
+            if(tabId === 'game' && currentLevel === 0 && gameScore === 0) {
+                loadBubbleGame();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- 2. Logika Game Bubble Pop ---
+        let gameScore = 0;
+        const gameLevels = [
+            { eq: "x² + 7x + 10", b: 7, c: 10, correct: [2, 5], decoys: [-2, 7, -5, 10, -7] },
+            { eq: "x² - 5x + 6", b: -5, c: 6, correct: [-2, -3], decoys: [2, 3, 6, -1, -6] },
+            { eq: "x² + 3x - 18", b: 3, c: -18, correct: [6, -3], decoys: [-6, 3, 18, -2, 9] },
+            { eq: "x² - 4x - 12", b: -4, c: -12, correct: [-6, 2], decoys: [6, -2, 4, 3, -4] }
+        ];
+        let currentLevel = 0;
+        let selectedBubbles = [];
+
+        function loadBubbleGame() {
+            if (currentLevel >= gameLevels.length) {
+                currentLevel = 0; // Ulang game ke awal
+            }
+            const level = gameLevels[currentLevel];
+            
+            // Format persamaan pakai MathJax
+            document.getElementById('bubble-equation').innerHTML = `\\( ${level.eq} \\)`;
+            if (window.MathJax) MathJax.typesetPromise([document.getElementById('bubble-equation')]);
+            
+            document.getElementById('bubble-target-b').innerText = level.b;
+            document.getElementById('bubble-target-c').innerText = level.c;
+            
+            const msg = document.getElementById('game-msg');
+            msg.innerText = "Pilih 2 gelembung yang tepat!";
+            msg.className = "text-lg font-bold text-sky-800 bg-sky-100 border-2 border-sky-300 px-6 py-2 rounded-full inline-block transition-all mt-4";
+            
+            selectedBubbles = [];
+            const container = document.getElementById('bubble-area');
+            container.innerHTML = ''; 
+            
+            let allNumbers = [...level.correct, ...level.decoys];
+            // Acak urutan angka
+            allNumbers.sort(() => Math.random() - 0.5); 
+            allNumbers = allNumbers.slice(0, 7); 
+            
+            // Pastikan kunci jawaban (2 angka) selalu muncul di layar
+            if(!allNumbers.includes(level.correct[0])) allNumbers[0] = level.correct[0];
+            if(!allNumbers.includes(level.correct[1])) allNumbers[1] = level.correct[1];
+            allNumbers.sort(() => Math.random() - 0.5); 
+
+            allNumbers.forEach((num) => {
+                const bubble = document.createElement('div');
+                const colors = ['bg-pink-400', 'bg-lime-500', 'bg-yellow-400', 'bg-sky-400', 'bg-purple-400'];
+                const bg = colors[Math.floor(Math.random() * colors.length)];
+                
+                bubble.className = `bubble ${bg} text-white absolute floating`;
+                bubble.innerText = num;
+                bubble.dataset.value = num;
+                
+                const topPos = 10 + Math.random() * 60; 
+                const leftPos = 10 + Math.random() * 70; 
+                bubble.style.top = `${topPos}%`;
+                bubble.style.left = `${leftPos}%`;
+                bubble.style.animationDelay = `${Math.random() * 2}s`;
+                
+                bubble.onclick = () => handleBubbleClick(bubble, level);
+                container.appendChild(bubble);
+            });
+        }
+
+        function handleBubbleClick(bubbleElement, level) {
+            // Abaikan jika bubble sudah meletus atau sudah 2 dipilih
+            if(bubbleElement.classList.contains('pop') || (selectedBubbles.length >= 2 && !bubbleElement.classList.contains('selected'))) return;
+            
+            const val = parseInt(bubbleElement.dataset.value);
+            
+            if(bubbleElement.classList.contains('selected')) {
+                // Batal pilih
+                bubbleElement.classList.remove('selected');
+                selectedBubbles = selectedBubbles.filter(b => b.element !== bubbleElement);
+            } else {
+                // Pilih bubble
+                bubbleElement.classList.add('selected');
+                selectedBubbles.push({ element: bubbleElement, val: val });
+            }
+            
+            if(selectedBubbles.length === 2) {
+                setTimeout(() => checkBubbleAnswer(level), 400);
+            }
+        }
+
+        function checkBubbleAnswer(level) {
+            const v1 = selectedBubbles[0].val;
+            const v2 = selectedBubbles[1].val;
+            const msg = document.getElementById('game-msg');
+            
+            // Cek Syarat b (jumlah) dan c (kali)
+            if((v1 + v2 === level.b) && (v1 * v2 === level.c)) {
+                msg.innerHTML = '<i class="fa-solid fa-check-circle"></i> YAY! Benar Sekali!';
+                msg.className = "text-lg font-bold text-white bg-lime-500 border-2 border-lime-600 px-6 py-2 rounded-full inline-block mt-4 animate-bounce";
+                gameScore += 25;
+                document.getElementById('game-score').innerText = gameScore;
+                
+                // Animasi pop
+                selectedBubbles.forEach(b => b.element.classList.add('pop'));
+                
+                // Lanjut level
+                setTimeout(() => {
+                    currentLevel++;
+                    loadBubbleGame();
+                }, 1500);
+            } else {
+                msg.innerHTML = '<i class="fa-solid fa-xmark-circle"></i> Oops! Salah, hitung lagi!';
+                msg.className = "text-lg font-bold text-white bg-rose-500 border-2 border-rose-600 px-6 py-2 rounded-full inline-block mt-4";
+                
+                // Efek getar salah
+                selectedBubbles.forEach(b => {
+                    b.element.style.transform = "translateX(-10px)";
+                    setTimeout(() => b.element.style.transform = "translateX(10px)", 100);
+                    setTimeout(() => b.element.style.transform = "", 200);
+                    b.element.classList.remove('selected');
+                });
+                selectedBubbles = [];
+            }
+        }
+
+        // --- 3. Logika Evaluasi (Kuis) ---
+        // Kunci Jawaban
+        const correctAnswers = {
+            q1: 'A', // x^2+7x+10 -> (x+2)(x+5)
+            q2: 'C', // x^2-3x-18 -> (x+3)(x-6)
+            q3: 'B', // x^2-9x+20 -> -4 dan -5
+            q4: 'B', // x^2+2x-15 -> (x+5)(x-3), jadi (x+5) adalah faktor
+            q5: 'C'  // x^2-10x+25 -> (x-5)(x-5)
+        };
+
+        const explanations = {
+            q1: "1. $x^2+7x+10$: Cari faktor 10 yang jumlahnya 7. Angkanya adalah 2 dan 5. Jadi $(x+2)(x+5)$.",
+            q2: "2. $x^2-3x-18$: Cari faktor -18 yang jumlahnya -3. Angkanya adalah 3 dan -6. Jadi $(x+3)(x-6)$.",
+            q3: "3. $x^2-9x+20$: Cari bilangan yang dikali hasilnya 20 dan ditambah hasilnya -9. Angkanya adalah -4 dan -5.",
+            q4: "4. $x^2+2x-15$: Difaktorkan menjadi $(x+5)(x-3)$. Maka $(x+5)$ adalah salah satu faktornya.",
+            q5: "5. $x^2-10x+25$: Faktor dari 25 yang jumlahnya -10 adalah -5 dan -5. Jadi $(x-5)(x-5)$."
+        };
+
+        function submitQuiz(e) {
+            e.preventDefault(); // Cegah halaman reload
+            let score = 0;
+            let wrongQuestions = [];
+
+            // Hitung skor
+            for (let key in correctAnswers) {
+                const selected = document.querySelector(`input[name="${key}"]:checked`);
+                if (selected && selected.value === correctAnswers[key]) {
+                    score += 20;
+                } else {
+                    wrongQuestions.push(key);
+                }
+            }
+
+            // Sembunyikan form, tampilkan hasil
+            document.getElementById('quiz-form').classList.add('hidden');
+            const resultBox = document.getElementById('quiz-result');
+            resultBox.classList.remove('hidden');
+            
+            // Tulis nilai
+            document.getElementById('final-score').innerText = score;
+
+            // Beri Feedback
+            const feedbackBox = document.getElementById('feedback-container');
+            if (score === 100) {
+                feedbackBox.innerHTML = '<span class="text-lime-600">Luar Biasa! Pemahamanmu Sangat Sempurna! 🌟</span>';
+                document.getElementById('pembahasan').classList.add('hidden');
+            } else if (score >= 60) {
+                feedbackBox.innerHTML = '<span class="text-sky-600">Bagus! Kamu sudah memahami konsep dasar dengan baik. 👍</span>';
+            } else {
+                feedbackBox.innerHTML = '<span class="text-rose-500">Tetap Semangat! Ayo pelajari materinya lagi. 💪</span>';
+            }
+
+            // Tampilkan pembahasan jika ada yang salah
+            if(score < 100) {
+                const list = document.getElementById('kunci-list');
+                list.innerHTML = '';
+                wrongQuestions.forEach(q => {
+                    const li = document.createElement('li');
+                    li.innerHTML = explanations[q];
+                    list.appendChild(li);
+                });
+                document.getElementById('pembahasan').classList.remove('hidden');
+                
+                // Render MathJax untuk pembahasan
+                if (window.MathJax) MathJax.typesetPromise([list]);
+            }
+        }
+
+        function resetQuiz() {
+            document.getElementById('quiz-form').reset();
+            document.getElementById('quiz-form').classList.remove('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- 4. Inisialisasi Saat Load Halaman ---
+        window.onload = function() {
+            // Set tombol beranda aktif
+            document.getElementById('btn-beranda').classList.add('bg-sky-600', 'border-sky-800');
+            document.getElementById('btn-beranda').classList.remove('hover:bg-sky-400');
+        };
+    </script>
+</body>
+</html>
+
+```
+          
